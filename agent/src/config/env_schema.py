@@ -195,6 +195,7 @@ class DataConfig(_EnvBase):
     longbridge_access_token: str = Field(alias="LONGBRIDGE_ACCESS_TOKEN", default="")
     etoro_api_key: str = Field(alias="ETORO_API_KEY", default="")
     etoro_user_key: str = Field(alias="ETORO_USER_KEY", default="")
+    ticker_pg_readonly_dsn: str = Field(alias="TICKER_PG_READONLY_DSN", default="")
 
 
 # ---------------------------------------------------------------------------
