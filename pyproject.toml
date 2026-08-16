@@ -155,6 +155,12 @@ harmonic = [
 dingtalk = [
     "dingtalk-stream>=0.24.0",
 ]
+ticker_pg = [
+    # Local read-only PostgreSQL data layer (shared ticker database).
+    # A-share daily bars via v_daily_bar_qfq; lazy-imported so the base
+    # install stays lean when the PG data layer is not configured.
+    "psycopg[binary]>=3.1",
+]
 discord = [
     "discord.py>=2.4.0",
 ]

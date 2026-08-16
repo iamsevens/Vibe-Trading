@@ -23,8 +23,6 @@ from backtest.loaders.registry import register
 
 logger = logging.getLogger(__name__)
 
-_DSN_ENV = "TICKER_PG_READONLY_DSN"
-
 _MARKET_MAP = {"SH": "SH", "SZ": "SZ", "BJ": "BJ"}
 
 
@@ -37,11 +35,12 @@ class DataLoader:
     volume_units = {"a_share": "shares"}
     requires_auth = True
 
-    def __init__(self) -> None:
-        self._dsn = __import__("os").environ.get(_DSN_ENV, "")
+    def _get_dsn(self) -> str:
+        from src.config.accessor import get_env_config
+        return get_env_config().data.ticker_pg_readonly_dsn
 
     def is_available(self) -> bool:
-        if not self._dsn:
+        if not self._get_dsn():
             return False
         try:
             import psycopg  # noqa: F401
@@ -82,7 +81,7 @@ class DataLoader:
         import psycopg
 
         try:
-            conn = psycopg.connect(self._dsn, connect_timeout=6)
+            conn = psycopg.connect(self._get_dsn(), connect_timeout=6)
         except Exception as exc:
             logger.warning("ticker_pg connect failed: %s", exc)
             return {}
@@ -129,10 +128,16 @@ class DataLoader:
               AND trade_date BETWEEN %s AND %s
             ORDER BY trade_date
         """
-        df = pd.read_sql(query, conn, params=(market, symbol, start_date, end_date))
+        with conn.cursor() as cur:
+            cur.execute(query, (market, symbol, start_date, end_date))
+            rows = cur.fetchall()
 
-        if df.empty:
+        if not rows:
             return None
+
+        df = pd.DataFrame(
+            rows, columns=["trade_date", "open", "high", "low", "close", "volume", "amount"]
+        )
 
         df["trade_date"] = pd.to_datetime(df["trade_date"])
         for col in ["open", "high", "low", "close", "volume", "amount"]:
