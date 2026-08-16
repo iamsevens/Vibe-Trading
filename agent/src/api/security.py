@@ -28,12 +28,10 @@ from src.config.accessor import get_env_config
 # ============================================================================
 
 _DEFAULT_CORS_ORIGINS: tuple[str, ...] = (
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:8000",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8000",
+    "http://localhost:5899",
+    "http://localhost:21082",
+    "http://127.0.0.1:5899",
+    "http://127.0.0.1:21082",
 )
 
 # Opt-in additive CORS origins. Unlike ``CORS_ORIGINS`` — which *replaces* the

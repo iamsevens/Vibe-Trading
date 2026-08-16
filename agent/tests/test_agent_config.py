@@ -152,7 +152,7 @@ def test_schema_accepts_sse_transport() -> None:
             "mcpServers": {
                 "demo": {
                     "type": "sse",
-                    "url": "http://localhost:8900/sse",
+                    "url": "http://localhost:22137/sse",
                     "headers": {"Authorization": "Bearer demo"},
                 }
             }
@@ -160,7 +160,7 @@ def test_schema_accepts_sse_transport() -> None:
     )
 
     assert config.mcp_servers["demo"].type == "sse"
-    assert config.mcp_servers["demo"].url == "http://localhost:8900/sse"
+    assert config.mcp_servers["demo"].url == "http://localhost:22137/sse"
 
 
 def test_schema_accepts_streamable_http_transport() -> None:
@@ -169,14 +169,14 @@ def test_schema_accepts_streamable_http_transport() -> None:
             "mcpServers": {
                 "demo": {
                     "type": "streamableHttp",
-                    "url": "http://localhost:8900/mcp",
+                    "url": "http://localhost:22137/mcp",
                 }
             }
         }
     )
 
     assert config.mcp_servers["demo"].type == "streamableHttp"
-    assert config.mcp_servers["demo"].url == "http://localhost:8900/mcp"
+    assert config.mcp_servers["demo"].url == "http://localhost:22137/mcp"
 
 
 def test_schema_rejects_url_only_http_transport_without_type() -> None:
@@ -185,7 +185,7 @@ def test_schema_rejects_url_only_http_transport_without_type() -> None:
             {
                 "mcpServers": {
                     "demo": {
-                        "url": "http://localhost:8900/events",
+                        "url": "http://localhost:22137/events",
                     }
                 }
             }
@@ -199,7 +199,7 @@ def test_schema_rejects_http_transport_with_stdio_fields() -> None:
                 "mcpServers": {
                     "demo": {
                         "type": "sse",
-                        "url": "http://localhost:8900/sse",
+                        "url": "http://localhost:22137/sse",
                         "command": "uvx",
                     }
                 }
@@ -215,7 +215,7 @@ def test_schema_rejects_stdio_with_http_fields() -> None:
                     "demo": {
                         "type": "stdio",
                         "command": "uvx",
-                        "url": "http://localhost:8900/sse",
+                        "url": "http://localhost:22137/sse",
                     }
                 }
             }
@@ -302,7 +302,7 @@ def test_runtime_overrides_can_replace_server_transport(tmp_path: Path) -> None:
             "mcpServers": {
                 "demo": {
                     "type": "sse",
-                    "url": "http://localhost:8900/sse",
+                    "url": "http://localhost:22137/sse",
                     "headers": {"Authorization": "Bearer demo"},
                 }
             }
@@ -310,7 +310,7 @@ def test_runtime_overrides_can_replace_server_transport(tmp_path: Path) -> None:
     )
 
     assert config.mcp_servers["demo"].type == "sse"
-    assert config.mcp_servers["demo"].url == "http://localhost:8900/sse"
+    assert config.mcp_servers["demo"].url == "http://localhost:22137/sse"
     assert config.mcp_servers["demo"].headers == {"Authorization": "Bearer demo"}
     assert config.mcp_servers["demo"].command == ""
     assert config.mcp_servers["demo"].args == []
@@ -330,7 +330,7 @@ def test_runtime_overrides_fall_back_to_base_config_when_merge_is_invalid(tmp_pa
         overrides={
             "mcpServers": {
                 "demo": {
-                    "url": "http://localhost:8900/events",
+                    "url": "http://localhost:22137/events",
                 }
             }
         },

@@ -56,13 +56,13 @@ def test_parse_allowed_hosts_normalizes_entries():
 
 
 def test_normalize_host_strips_port_and_lowercases():
-    assert mcp_server._normalize_host("LOCALHOST:8900") == "localhost"
+    assert mcp_server._normalize_host("LOCALHOST:22137") == "localhost"
     assert mcp_server._normalize_host("Example.COM") == "example.com"
-    assert mcp_server._normalize_host("127.0.0.1:8900") == "127.0.0.1"
+    assert mcp_server._normalize_host("127.0.0.1:22137") == "127.0.0.1"
 
 
 def test_normalize_host_handles_ipv6_forms():
-    assert mcp_server._normalize_host("[::1]:8900") == "::1"
+    assert mcp_server._normalize_host("[::1]:22137") == "::1"
     assert mcp_server._normalize_host("[::1]") == "::1"
     # Bare IPv6 (no brackets) is kept whole, never split into a fake host:port.
     assert mcp_server._normalize_host("::1") == "::1"
@@ -83,7 +83,7 @@ def test_origin_allowed_missing_origin_is_allowed():
 
 def test_origin_allowed_matches_allow_list():
     hosts = ["127.0.0.1", "localhost"]
-    assert mcp_server._origin_allowed("http://localhost:8900", hosts) is True
+    assert mcp_server._origin_allowed("http://localhost:22137", hosts) is True
     assert mcp_server._origin_allowed("http://127.0.0.1", hosts) is True
 
 
@@ -123,7 +123,7 @@ def test_network_app_rejects_untrusted_origin():
     client = TestClient(app)
     resp = client.post(
         "/mcp",
-        headers={"host": "127.0.0.1:8900", "origin": "http://evil.example.com"},
+        headers={"host": "127.0.0.1:22137", "origin": "http://evil.example.com"},
     )
     assert resp.status_code == 403  # _OriginGuardMiddleware rejection
 
@@ -148,12 +148,12 @@ def test_loopback_host_and_origin_accepted():
     client = TestClient(_guarded_probe_app(["127.0.0.1", "localhost"]))
     # Good host, matching origin.
     resp = client.post(
-        "/mcp", headers={"host": "127.0.0.1:8900", "origin": "http://127.0.0.1:8900"}
+        "/mcp", headers={"host": "127.0.0.1:22137", "origin": "http://127.0.0.1:22137"}
     )
     assert resp.status_code == 200
     assert resp.text == "ok"
     # Good host, no origin header (non-browser client).
-    resp = client.post("/mcp", headers={"host": "localhost:8900"})
+    resp = client.post("/mcp", headers={"host": "localhost:22137"})
     assert resp.status_code == 200
 
 
@@ -166,7 +166,7 @@ def test_env_override_extends_allow_list():
     )
     assert resp.status_code == 200
     # Loopback is no longer implicitly trusted once an explicit list is set.
-    resp = client.post("/mcp", headers={"host": "127.0.0.1:8900"})
+    resp = client.post("/mcp", headers={"host": "127.0.0.1:22137"})
     assert resp.status_code == 400
 
 
@@ -178,7 +178,7 @@ def test_env_override_extends_allow_list():
 def test_ipv6_loopback_accepted_by_default_list():
     """`--host ::1` deployments must not 400 every request (Starlette did)."""
     client = TestClient(_guarded_probe_app(mcp_server._parse_allowed_hosts(None)))
-    resp = client.post("/mcp", headers={"host": "[::1]:8900"})
+    resp = client.post("/mcp", headers={"host": "[::1]:22137"})
     assert resp.status_code == 200
     resp = client.post("/mcp", headers={"host": "::1"})
     assert resp.status_code == 200
@@ -189,13 +189,13 @@ def test_ipv6_env_entry_accepts_bracketed_host():
     for entry in ("[::1]", "::1"):
         hosts = mcp_server._parse_allowed_hosts(entry)
         client = TestClient(_guarded_probe_app(hosts))
-        resp = client.post("/mcp", headers={"host": "[::1]:8900"})
+        resp = client.post("/mcp", headers={"host": "[::1]:22137"})
         assert resp.status_code == 200, entry
 
 
 def test_host_matching_is_case_insensitive():
     client = TestClient(_guarded_probe_app(["127.0.0.1", "localhost"]))
-    resp = client.post("/mcp", headers={"host": "LOCALHOST:8900"})
+    resp = client.post("/mcp", headers={"host": "LOCALHOST:22137"})
     assert resp.status_code == 200
 
 

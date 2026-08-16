@@ -696,7 +696,7 @@ vibe-trading run -p "Backtest a BTC-USDT 20/50 moving-average strategy for 2024 
 ```bash
 vibe-trading init              # interactive .env setup
 vibe-trading                   # launch CLI
-vibe-trading serve --port 8899 # launch web UI
+vibe-trading serve --port 21082 # launch web UI
 vibe-trading-mcp               # start MCP server (stdio)
 ```
 
@@ -730,9 +730,9 @@ cp agent/.env.example agent/.env
 docker compose up --build
 ```
 
-افتح `http://localhost:8899`. الخلفية والواجهة الأمامية داخل حاوية واحدة.
+افتح `http://localhost:21082`. الخلفية والواجهة الأمامية داخل حاوية واحدة.
 
-ينشر Docker الخلفية على `127.0.0.1:8899` افتراضياً ويشغل التطبيق كمستخدم حاوية غير root. إذا كنت تقصد تعريض API خارج جهازك، فاضبط `API_AUTH_KEY` قوياً وأرسل `Authorization: Bearer <key>` من العملاء.
+ينشر Docker الخلفية على `127.0.0.1:21082` افتراضياً ويشغل التطبيق كمستخدم حاوية غير root. إذا كنت تقصد تعريض API خارج جهازك، فاضبط `API_AUTH_KEY` قوياً وأرسل `Authorization: Bearer <key>` من العملاء.
 
 ### المسار B: التثبيت المحلي
 
@@ -759,23 +759,23 @@ vibe-trading                       # Launch interactive TUI
 
 ```bash
 # Terminal 1: API server
-vibe-trading serve --port 8899
+vibe-trading serve --port 21082
 
 # Terminal 2: Frontend dev server
 cd frontend && npm install && npm run dev  # يتطلب Node >= 22.22
 ```
 
-افتح `http://localhost:5899`. تمرر الواجهة الأمامية استدعاءات API إلى `localhost:8899`.
+افتح `http://localhost:5899`. تمرر الواجهة الأمامية استدعاءات API إلى `localhost:21082`.
 
 **وضع الإنتاج (خادم واحد):**
 
 ```bash
 cd frontend && npm run build && cd ..
-vibe-trading serve --port 8899     # FastAPI serves dist/ as static files
+vibe-trading serve --port 21082     # FastAPI serves dist/ as static files
 ```
 
 > [!NOTE]
-> يرتبط `vibe-trading serve` بالعنوان `0.0.0.0` لكنه يثق فقط بطلبات loopback افتراضيًا: فتح الواجهة على **نفس الجهاز** (`http://localhost:8899`) يعمل دون أي إعداد. إذا تصفّحت من **جهاز آخر أو مضيف جهاز افتراضي أو هاتف على شبكتك المحلية**، فستُعيد النقاط الحساسة الرمز `403` وتظهر في المحادثة رسالة “Remote API access requires an API key” — عيّن مفتاح `API_AUTH_KEY` قويًا في `agent/.env`، ثم أعد التشغيل وأدخل المفتاح نفسه مرة واحدة في **Settings**. (بوابة مضيف Docker Desktop: عيّن `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` مع الإبقاء على ربط المنفذ الافتراضي `127.0.0.1`.)
+> يرتبط `vibe-trading serve` بالعنوان `0.0.0.0` لكنه يثق فقط بطلبات loopback افتراضيًا: فتح الواجهة على **نفس الجهاز** (`http://localhost:21082`) يعمل دون أي إعداد. إذا تصفّحت من **جهاز آخر أو مضيف جهاز افتراضي أو هاتف على شبكتك المحلية**، فستُعيد النقاط الحساسة الرمز `403` وتظهر في المحادثة رسالة “Remote API access requires an API key” — عيّن مفتاح `API_AUTH_KEY` قويًا في `agent/.env`، ثم أعد التشغيل وأدخل المفتاح نفسه مرة واحدة في **Settings**. (بوابة مضيف Docker Desktop: عيّن `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` مع الإبقاء على ربط المنفذ الافتراضي `127.0.0.1`.)
 
 </details>
 
@@ -1033,7 +1033,7 @@ vibe-trading run -p "Summarize the key risks and beats/misses from this earnings
 ## 🌐 خادم API
 
 ```bash
-vibe-trading serve --port 8899
+vibe-trading serve --port 21082
 ```
 
 | الطريقة | نقطة النهاية | الوصف |
@@ -1071,7 +1071,7 @@ vibe-trading serve --port 8899
 | `GET` | `/correlation/regime` | الخط الزمني لنظام كثافة حواف الارتباط |
 | `GET` | `/agents.json` · `POST` `/v1/query` | جسر OpenBB Workspace — يُسجَّل فقط مع إضافة `openbb` الاختيارية، و`/v1/query` يتطلب مصادقة |
 
-توثيق تفاعلي: `http://localhost:8899/docs`
+توثيق تفاعلي: `http://localhost:21082/docs`
 
 ### الإعدادات الأمنية الافتراضية
 
@@ -1092,25 +1092,25 @@ vibe-trading serve --port 8899
 شغّل prompt بحثي أو backtest وفق جدول متكرر — من صفحة **المجدولة** في واجهة الويب أو عبر REST. المنفّذ الخلفي **معطّل افتراضياً** — شغّل الخادم بـ `VIBE_TRADING_ENABLE_SCHEDULER=1` لتفعيله:
 
 ```bash
-VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 8899
+VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 21082
 ```
 
 ثم أنشئ المهام عبر REST. الحقل `schedule` إما عدد صحيح بسيط (الفاصل بـ**المللي ثانية**) أو تعبير cron من 5 حقول (`دقيقة ساعة يوم شهر يوم-الأسبوع`؛ يقبل كل حقل `*` و`*/n` وأرقاماً وقوائم بفواصل ونطاقات مثل `1-5`). يُقيَّم cron وفق الساعة الحائطية لـ `timezone` الاختيارية للمهمة (مفتاح IANA)، فيبقى الإيقاع ثابتاً عبر تغييرات التوقيت الصيفي — يُتخطى الوقت غير الموجود في الربيع، ويُنفَّذ الوقت المكرر في الخريف مرة واحدة عند أول ظهور. المهام بدون `timezone` تحتفظ بدلالات UTC كما هي:
 
 ```bash
 # كل 6 ساعات (cron)
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Scan CSI300 for momentum breakouts and backtest the top 5","schedule":"0 */6 * * *"}'
 
 # أيام العمل 23:30 بتوقيت أوكلاند المحلي — ثابت عبر التوقيت الصيفي
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Pre-open scan of NZX names","schedule":"30 23 * * 1-5","timezone":"Pacific/Auckland"}'
 
 # السرد / الإلغاء
-curl http://localhost:8899/scheduled-runs
-curl -X DELETE http://localhost:8899/scheduled-runs/<job_id>
+curl http://localhost:21082/scheduled-runs
+curl -X DELETE http://localhost:21082/scheduled-runs/<job_id>
 ```
 
 كل تشغيل ينفّذ `prompt` في جلسة agent جديدة (تُوضع معلمات backtest الاختيارية في `config`)، وتُحفظ المهام تحت `~/.vibe-trading/` فتبقى بعد إعادة التشغيل. بدون هذه الراية، تسجّل نقاط `/scheduled-runs` المهام لكن لا يُطلق شيء. أضف `-H "Authorization: Bearer <key>"` لكل طلب عند ضبط `API_AUTH_KEY`.
@@ -1124,9 +1124,9 @@ vibe-trading playbook create premarket-brief \
   --var home_market="US equities" --var watchlist="AAPL, MSFT, NVDA" \
   --timezone America/New_York
 
-curl http://localhost:8899/scheduled-runs/playbooks
-curl http://localhost:8899/scheduled-runs/playbooks/premarket-brief
-curl -X POST http://localhost:8899/scheduled-runs/playbooks/premarket-brief \
+curl http://localhost:21082/scheduled-runs/playbooks
+curl http://localhost:21082/scheduled-runs/playbooks/premarket-brief
+curl -X POST http://localhost:21082/scheduled-runs/playbooks/premarket-brief \
   -H "Content-Type: application/json" \
   -d '{"variables":{"home_market":"US equities","watchlist":"AAPL, MSFT, NVDA"}}'
 ```

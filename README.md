@@ -708,7 +708,7 @@ vibe-trading run -p "Backtest a BTC-USDT 20/50 moving-average strategy for 2024 
 ```bash
 vibe-trading init              # interactive .env setup
 vibe-trading                   # launch CLI
-vibe-trading serve --port 8899 # launch web UI
+vibe-trading serve --port 21082 # launch web UI
 vibe-trading-mcp               # start MCP server (stdio)
 ```
 
@@ -742,7 +742,7 @@ cp agent/.env.example agent/.env
 docker compose up --build
 ```
 
-Open `http://localhost:8899`. Backend + frontend in one container.
+Open `http://localhost:21082`. Backend + frontend in one container.
 
 > [!NOTE]
 > **OpenAI Codex OAuth with Docker:** the browser login needs a terminal so you
@@ -755,7 +755,7 @@ Open `http://localhost:8899`. Backend + frontend in one container.
 >
 > If you use `docker exec` directly, pass `-it` before the container name.
 
-Docker publishes the backend on `127.0.0.1:8899` by default and runs the app as a non-root container user. If you intentionally expose the API beyond your own machine, set a strong `API_AUTH_KEY` and send `Authorization: Bearer <key>` from clients.
+Docker publishes the backend on `127.0.0.1:21082` by default and runs the app as a non-root container user. If you intentionally expose the API beyond your own machine, set a strong `API_AUTH_KEY` and send `Authorization: Bearer <key>` from clients.
 
 > [!NOTE]
 > **Using Ollama with Docker:** the container reaches a host-side Ollama via `host.docker.internal`, not `localhost` (inside the container `localhost` is the container itself). `docker-compose.yml` defaults `OLLAMA_BASE_URL` to `http://host.docker.internal:11434`; export `OLLAMA_BASE_URL` (or set it in a top-level `.env`) to point elsewhere. This relies on the `host-gateway` mapping in `extra_hosts`, which requires **Docker Engine ≥ 20.10 / Compose v2** (provided automatically on Docker Desktop).
@@ -787,25 +787,63 @@ vibe-trading                       # Launch interactive TUI
 
 ```bash
 # Terminal 1: API server
-vibe-trading serve --port 8899
+vibe-trading serve --port 21082
 
 # Terminal 2: Frontend dev server
 cd frontend && npm install && npm run dev  # requires Node >= 22.22
 ```
 
-Open `http://localhost:5899`. The frontend proxies API calls to `localhost:8899`.
+Open `http://localhost:5899`. The frontend proxies API calls to `localhost:21082`.
 
 **Production mode (single server):**
 
 ```bash
 cd frontend && npm run build && cd ..
-vibe-trading serve --port 8899     # FastAPI serves dist/ as static files
+vibe-trading serve --port 21082     # FastAPI serves dist/ as static files
 ```
 
 > [!NOTE]
-> `vibe-trading serve` binds `0.0.0.0` and is loopback-only by default: opening the UI on the **same machine** (`http://localhost:8899`) works with zero config. If you browse from **another machine, a VM host, or a phone on your LAN**, sensitive endpoints return `403` and the chat shows "Remote API access requires an API key" — set a strong `API_AUTH_KEY` in `agent/.env`, restart, and enter the same key once in **Settings**. (Docker Desktop's host gateway: set `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` with the default `127.0.0.1` port bind.)
+> `vibe-trading serve` binds `0.0.0.0` and is loopback-only by default: opening the UI on the **same machine** (`http://localhost:21082`) works with zero config. If you browse from **another machine, a VM host, or a phone on your LAN**, sensitive endpoints return `403` and the chat shows "Remote API access requires an API key" — set a strong `API_AUTH_KEY` in `agent/.env`, restart, and enter the same key once in **Settings**. (Docker Desktop's host gateway: set `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` with the default `127.0.0.1` port bind.)
 
 </details>
+
+#### Windows 一键启动（本地部署）
+
+如果你已经通过 `git clone https://github.com/iamsevens/Vibe-Trading.git` 将项目克隆到 `E:\github\Vibe-Trading`，可以使用以下快捷脚本：
+
+| 脚本 | 路径 | 功能 |
+|------|------|------|
+| `start-vibe-trading.bat` | `E:\github\start\start-vibe-trading.bat` | 启动后端服务（端口 21082） |
+| `stop-vibe-trading.bat` | `E:\github\start\stop-vibe-trading.bat` | 停止后端服务 |
+
+**启动步骤：**
+
+```powershell
+# 1. 首次部署（创建 venv + 安装依赖）
+cd E:\github\Vibe-Trading
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r agent\requirements.txt
+pip install baostock
+pip install -e .
+
+# 2. 配置 LLM（复制并编辑 .env）
+Copy-Item agent\.env.example agent\.env
+notepad agent\.env
+
+# 3. 双击运行启动脚本
+E:\github\start\start-vibe-trading.bat
+```
+
+**前端启动（另开终端）：**
+
+```powershell
+cd E:\github\Vibe-Trading\frontend
+npm install
+npm run dev -- --port 5899
+```
+
+浏览器访问 `http://localhost:5899`。
 
 ### Path C: MCP plugin
 
@@ -1080,7 +1118,7 @@ vibe-trading run -p "Summarize the key risks and beats/misses from this earnings
 ## 🌐 API Server
 
 ```bash
-vibe-trading serve --port 8899
+vibe-trading serve --port 21082
 ```
 
 | Method | Endpoint | Description |
@@ -1118,7 +1156,7 @@ vibe-trading serve --port 8899
 | `GET` | `/correlation/regime` | Correlation edge-density regime timeline |
 | `GET` | `/agents.json` · `POST` `/v1/query` | OpenBB Workspace bridge — registered only with the optional `openbb` extra; `/v1/query` requires auth |
 
-Interactive docs are available at `http://localhost:8899/docs` in keyless
+Interactive docs are available at `http://localhost:21082/docs` in keyless
 loopback development mode. When `API_AUTH_KEY` is configured, `/docs` and
 `/redoc` are disabled; authenticated tooling can fetch `/openapi.json` with an
 `Authorization: Bearer <key>` header.
@@ -1144,25 +1182,25 @@ The same Settings page includes an **IM Channels** panel for local operators. It
 Run a research prompt or backtest on a repeating schedule — from the **Scheduled** page in the web UI or over REST. The background executor is **off by default** — start the server with `VIBE_TRADING_ENABLE_SCHEDULER=1` to enable it:
 
 ```bash
-VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 8899
+VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 21082
 ```
 
 Then create jobs over REST. `schedule` is either a bare integer (interval in **milliseconds**) or a 5-field cron expression (`min hour dom mon dow`; each field takes `*`, `*/n`, numbers, comma lists, or low-high ranges like `1-5`). Cron runs on the wall clock of the job's optional `timezone` (an IANA key), so the cadence holds across DST transitions — a spring-forward gap time is skipped, and a fall-back ambiguous time runs once, at its first occurrence. Jobs without a `timezone` keep plain UTC semantics:
 
 ```bash
 # every 6 hours (cron)
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Scan CSI300 for momentum breakouts and backtest the top 5","schedule":"0 */6 * * *"}'
 
 # weekdays at 23:30 Auckland wall time — DST-proof
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Pre-open scan of NZX names","schedule":"30 23 * * 1-5","timezone":"Pacific/Auckland"}'
 
 # list / cancel
-curl http://localhost:8899/scheduled-runs
-curl -X DELETE http://localhost:8899/scheduled-runs/<job_id>
+curl http://localhost:21082/scheduled-runs
+curl -X DELETE http://localhost:21082/scheduled-runs/<job_id>
 ```
 
 Each fire runs the `prompt` through a fresh agent session (optional backtest parameters go in `config`), and jobs persist under `~/.vibe-trading/` so they survive restarts. Without the flag, the `/scheduled-runs` endpoints still record jobs but nothing fires. Add `-H "Authorization: Bearer <key>"` to each call when `API_AUTH_KEY` is set.
@@ -1176,9 +1214,9 @@ vibe-trading playbook create premarket-brief \
   --var home_market="US equities" --var watchlist="AAPL, MSFT, NVDA" \
   --timezone America/New_York
 
-curl http://localhost:8899/scheduled-runs/playbooks
-curl http://localhost:8899/scheduled-runs/playbooks/premarket-brief
-curl -X POST http://localhost:8899/scheduled-runs/playbooks/premarket-brief \
+curl http://localhost:21082/scheduled-runs/playbooks
+curl http://localhost:21082/scheduled-runs/playbooks/premarket-brief
+curl -X POST http://localhost:21082/scheduled-runs/playbooks/premarket-brief \
   -H "Content-Type: application/json" \
   -d '{"variables":{"home_market":"US equities","watchlist":"AAPL, MSFT, NVDA"}}'
 ```

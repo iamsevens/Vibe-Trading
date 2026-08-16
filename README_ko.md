@@ -699,7 +699,7 @@ vibe-trading run -p "Backtest a BTC-USDT 20/50 moving-average strategy for 2024 
 ```bash
 vibe-trading init              # interactive .env setup
 vibe-trading                   # launch CLI
-vibe-trading serve --port 8899 # launch web UI
+vibe-trading serve --port 21082 # launch web UI
 vibe-trading-mcp               # start MCP server (stdio)
 ```
 
@@ -733,9 +733,9 @@ cp agent/.env.example agent/.env
 docker compose up --build
 ```
 
-`http://localhost:8899`를 여세요. Backend + frontend가 하나의 container에 들어 있습니다.
+`http://localhost:21082`를 여세요. Backend + frontend가 하나의 container에 들어 있습니다.
 
-Docker는 기본적으로 backend를 `127.0.0.1:8899`에 게시하고 앱을 non-root container user로 실행합니다. API를 자신의 머신 밖으로 의도적으로 노출하는 경우 강력한 `API_AUTH_KEY`를 설정하고 client에서 `Authorization: Bearer <key>`를 보내세요.
+Docker는 기본적으로 backend를 `127.0.0.1:21082`에 게시하고 앱을 non-root container user로 실행합니다. API를 자신의 머신 밖으로 의도적으로 노출하는 경우 강력한 `API_AUTH_KEY`를 설정하고 client에서 `Authorization: Bearer <key>`를 보내세요.
 
 ### 경로 B: Local install
 
@@ -762,23 +762,23 @@ vibe-trading                       # Launch interactive TUI
 
 ```bash
 # Terminal 1: API server
-vibe-trading serve --port 8899
+vibe-trading serve --port 21082
 
 # Terminal 2: Frontend dev server
 cd frontend && npm install && npm run dev  # Node >= 22.22 필요
 ```
 
-`http://localhost:5899`를 여세요. Frontend는 API 호출을 `localhost:8899`로 proxy합니다.
+`http://localhost:5899`를 여세요. Frontend는 API 호출을 `localhost:21082`로 proxy합니다.
 
 **Production mode(single server):**
 
 ```bash
 cd frontend && npm run build && cd ..
-vibe-trading serve --port 8899     # FastAPI serves dist/ as static files
+vibe-trading serve --port 21082     # FastAPI serves dist/ as static files
 ```
 
 > [!NOTE]
-> `vibe-trading serve` 는 `0.0.0.0` 에 바인딩되지만 기본적으로 루프백만 신뢰합니다. **같은 컴퓨터**에서 UI를 열면(`http://localhost:8899`) 설정 없이 작동합니다. **다른 컴퓨터, VM 호스트, LAN의 휴대폰**에서 접속하면 민감한 엔드포인트가 `403` 을 반환하고 채팅에 “Remote API access requires an API key” 가 표시됩니다. `agent/.env` 에 강력한 `API_AUTH_KEY` 를 설정하고 재시작한 뒤 **Settings** 에서 같은 키를 입력하세요. (Docker Desktop 호스트 게이트웨이의 경우: 기본 `127.0.0.1` 포트 바인딩을 유지한 채 `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` 설정.)
+> `vibe-trading serve` 는 `0.0.0.0` 에 바인딩되지만 기본적으로 루프백만 신뢰합니다. **같은 컴퓨터**에서 UI를 열면(`http://localhost:21082`) 설정 없이 작동합니다. **다른 컴퓨터, VM 호스트, LAN의 휴대폰**에서 접속하면 민감한 엔드포인트가 `403` 을 반환하고 채팅에 “Remote API access requires an API key” 가 표시됩니다. `agent/.env` 에 강력한 `API_AUTH_KEY` 를 설정하고 재시작한 뒤 **Settings** 에서 같은 키를 입력하세요. (Docker Desktop 호스트 게이트웨이의 경우: 기본 `127.0.0.1` 포트 바인딩을 유지한 채 `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` 설정.)
 
 </details>
 
@@ -1036,7 +1036,7 @@ vibe-trading run -p "Summarize the key risks and beats/misses from this earnings
 ## 🌐 API 서버
 
 ```bash
-vibe-trading serve --port 8899
+vibe-trading serve --port 21082
 ```
 
 | Method | Endpoint | Description |
@@ -1074,7 +1074,7 @@ vibe-trading serve --port 8899
 | `GET` | `/correlation/regime` | 상관 엣지 밀도 레짐 타임라인 |
 | `GET` | `/agents.json` · `POST` `/v1/query` | OpenBB Workspace 브리지 — 선택적 `openbb` extra 설치 시에만 등록, `/v1/query`는 인증 필요 |
 
-Interactive docs: `http://localhost:8899/docs`
+Interactive docs: `http://localhost:21082/docs`
 
 ### 보안 기본값
 
@@ -1095,25 +1095,25 @@ Settings read는 side effect가 없습니다. `GET /settings/llm`과 `GET /setti
 리서치 prompt나 backtest를 반복 일정으로 실행합니다 — Web UI의 **예약** 페이지에서도, REST로도 관리할 수 있습니다. 백그라운드 executor는 **기본적으로 꺼져 있습니다** — `VIBE_TRADING_ENABLE_SCHEDULER=1`로 server를 시작하면 활성화됩니다:
 
 ```bash
-VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 8899
+VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 21082
 ```
 
 그런 다음 REST로 작업을 생성합니다. `schedule`은 단순 정수(간격, 단위 **밀리초**)이거나 5필드 cron 표현식(`분 시 일 월 요일`; 각 필드는 `*`, `*/n`, 숫자, 쉼표 목록, `1-5` 같은 범위 지원)입니다. cron은 작업의 선택적 `timezone`(IANA 키)의 벽시계 기준으로 평가되어 서머타임 전환 후에도 주기가 유지됩니다 — 봄에 존재하지 않는 시각은 건너뛰고, 가을에 중복되는 시각은 첫 번째 발생 시 한 번만 실행됩니다. `timezone`이 없는 작업은 기존 UTC 의미를 유지합니다:
 
 ```bash
 # 6시간마다 (cron)
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Scan CSI300 for momentum breakouts and backtest the top 5","schedule":"0 */6 * * *"}'
 
 # 평일 23:30 (오클랜드 현지 시각, 서머타임에도 안 밀림)
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Pre-open scan of NZX names","schedule":"30 23 * * 1-5","timezone":"Pacific/Auckland"}'
 
 # 목록 / 취소
-curl http://localhost:8899/scheduled-runs
-curl -X DELETE http://localhost:8899/scheduled-runs/<job_id>
+curl http://localhost:21082/scheduled-runs
+curl -X DELETE http://localhost:21082/scheduled-runs/<job_id>
 ```
 
 각 실행은 새 agent session에서 `prompt`를 실행하며(선택적 backtest 파라미터는 `config`에 넣습니다), 작업은 `~/.vibe-trading/`에 저장되어 재시작 후에도 유지됩니다. 이 플래그가 없으면 `/scheduled-runs` endpoint는 작업을 기록하지만 실행되지는 않습니다. `API_AUTH_KEY`가 설정된 경우 각 호출에 `-H "Authorization: Bearer <key>"`를 추가하세요.
@@ -1127,9 +1127,9 @@ vibe-trading playbook create premarket-brief \
   --var home_market="US equities" --var watchlist="AAPL, MSFT, NVDA" \
   --timezone America/New_York
 
-curl http://localhost:8899/scheduled-runs/playbooks
-curl http://localhost:8899/scheduled-runs/playbooks/premarket-brief
-curl -X POST http://localhost:8899/scheduled-runs/playbooks/premarket-brief \
+curl http://localhost:21082/scheduled-runs/playbooks
+curl http://localhost:21082/scheduled-runs/playbooks/premarket-brief
+curl -X POST http://localhost:21082/scheduled-runs/playbooks/premarket-brief \
   -H "Content-Type: application/json" \
   -d '{"variables":{"home_market":"US equities","watchlist":"AAPL, MSFT, NVDA"}}'
 ```

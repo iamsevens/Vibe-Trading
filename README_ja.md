@@ -701,7 +701,7 @@ vibe-trading run -p "Backtest a BTC-USDT 20/50 moving-average strategy for 2024 
 ```bash
 vibe-trading init              # interactive .env setup
 vibe-trading                   # launch CLI
-vibe-trading serve --port 8899 # launch web UI
+vibe-trading serve --port 21082 # launch web UI
 vibe-trading-mcp               # start MCP server (stdio)
 ```
 
@@ -735,9 +735,9 @@ cp agent/.env.example agent/.env
 docker compose up --build
 ```
 
-`http://localhost:8899` を開きます。Backend + frontend が 1 つの container で動作します。
+`http://localhost:21082` を開きます。Backend + frontend が 1 つの container で動作します。
 
-Docker は既定で backend を `127.0.0.1:8899` に公開し、app を non-root container user として実行します。意図して API を自分の machine 外へ公開する場合は、強い `API_AUTH_KEY` を設定し、client から `Authorization: Bearer <key>` を送ってください。
+Docker は既定で backend を `127.0.0.1:21082` に公開し、app を non-root container user として実行します。意図して API を自分の machine 外へ公開する場合は、強い `API_AUTH_KEY` を設定し、client から `Authorization: Bearer <key>` を送ってください。
 
 ### Path B: Local install
 
@@ -764,23 +764,23 @@ vibe-trading                       # Launch interactive TUI
 
 ```bash
 # Terminal 1: API server
-vibe-trading serve --port 8899
+vibe-trading serve --port 21082
 
 # Terminal 2: Frontend dev server
 cd frontend && npm install && npm run dev  # Node >= 22.22 が必要
 ```
 
-`http://localhost:5899` を開きます。frontend は API calls を `localhost:8899` へ proxy します。
+`http://localhost:5899` を開きます。frontend は API calls を `localhost:21082` へ proxy します。
 
 **Production mode（single server）:**
 
 ```bash
 cd frontend && npm run build && cd ..
-vibe-trading serve --port 8899     # FastAPI serves dist/ as static files
+vibe-trading serve --port 21082     # FastAPI serves dist/ as static files
 ```
 
 > [!NOTE]
-> `vibe-trading serve` は `0.0.0.0` にバインドしますが、デフォルトではループバックのみを信頼します。**同じマシン**で UI を開く場合（`http://localhost:8899`）は設定不要で動作します。**別のマシン・VM ホスト・LAN 上のスマートフォン**からアクセスすると、機微なエンドポイントは `403` を返し、チャットに “Remote API access requires an API key” と表示されます。`agent/.env` に強力な `API_AUTH_KEY` を設定して再起動し、**Settings** で同じキーを入力してください。（Docker Desktop のホストゲートウェイの場合: デフォルトの `127.0.0.1` ポートバインドのまま `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` を設定。）
+> `vibe-trading serve` は `0.0.0.0` にバインドしますが、デフォルトではループバックのみを信頼します。**同じマシン**で UI を開く場合（`http://localhost:21082`）は設定不要で動作します。**別のマシン・VM ホスト・LAN 上のスマートフォン**からアクセスすると、機微なエンドポイントは `403` を返し、チャットに “Remote API access requires an API key” と表示されます。`agent/.env` に強力な `API_AUTH_KEY` を設定して再起動し、**Settings** で同じキーを入力してください。（Docker Desktop のホストゲートウェイの場合: デフォルトの `127.0.0.1` ポートバインドのまま `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` を設定。）
 
 </details>
 
@@ -1035,7 +1035,7 @@ vibe-trading run -p "Summarize the key risks and beats/misses from this earnings
 ## 🌐 API サーバー
 
 ```bash
-vibe-trading serve --port 8899
+vibe-trading serve --port 21082
 ```
 
 | Method | Endpoint | Description |
@@ -1073,7 +1073,7 @@ vibe-trading serve --port 8899
 | `GET` | `/correlation/regime` | 相関エッジ密度のレジームタイムライン |
 | `GET` | `/agents.json` · `POST` `/v1/query` | OpenBB Workspace ブリッジ — 任意の `openbb` extra 導入時のみ登録、`/v1/query` は認証必須 |
 
-Interactive docs: `http://localhost:8899/docs`
+Interactive docs: `http://localhost:21082/docs`
 
 ### Security defaults
 
@@ -1094,25 +1094,25 @@ Settings reads は side-effect free です。`GET /settings/llm` と `GET /setti
 リサーチ prompt や backtest を繰り返しスケジュールで実行します。Web UI の**スケジュール**ページからも REST からも操作できます。バックグラウンド executor は**既定でオフ**です。`VIBE_TRADING_ENABLE_SCHEDULER=1` を付けて server を起動すると有効になります:
 
 ```bash
-VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 8899
+VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 21082
 ```
 
 その後、REST でジョブを作成します。`schedule` は単なる整数（interval は**ミリ秒**）か、5 フィールドの cron 式（`分 時 日 月 曜日`。各フィールドは `*`、`*/n`、数値、カンマ区切りリスト、`1-5` のような範囲に対応）です。cron はジョブの任意の `timezone`（IANA キー）の壁時計で評価され、夏時間の切り替え後もリズムは変わりません——存在しない時刻（春の進み）はスキップされ、重複する時刻（秋の戻り）は最初の 1 回だけ実行されます。`timezone` のないジョブは従来どおり UTC で動作します:
 
 ```bash
 # 6 時間ごと（cron）
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Scan CSI300 for momentum breakouts and backtest the top 5","schedule":"0 */6 * * *"}'
 
 # 平日 23:30（オークランドの壁時計、夏時間でもずれない）
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Pre-open scan of NZX names","schedule":"30 23 * * 1-5","timezone":"Pacific/Auckland"}'
 
 # 一覧 / キャンセル
-curl http://localhost:8899/scheduled-runs
-curl -X DELETE http://localhost:8899/scheduled-runs/<job_id>
+curl http://localhost:21082/scheduled-runs
+curl -X DELETE http://localhost:21082/scheduled-runs/<job_id>
 ```
 
 各実行は新しい agent session で `prompt` を実行し（任意の backtest パラメータは `config` に入れます）、ジョブは `~/.vibe-trading/` に永続化されるため再起動後も残ります。このフラグがない場合、`/scheduled-runs` endpoints はジョブを記録しますが実行はされません。`API_AUTH_KEY` を設定している場合は各呼び出しに `-H "Authorization: Bearer <key>"` を付けてください。
@@ -1126,9 +1126,9 @@ vibe-trading playbook create premarket-brief \
   --var home_market="US equities" --var watchlist="AAPL, MSFT, NVDA" \
   --timezone America/New_York
 
-curl http://localhost:8899/scheduled-runs/playbooks
-curl http://localhost:8899/scheduled-runs/playbooks/premarket-brief
-curl -X POST http://localhost:8899/scheduled-runs/playbooks/premarket-brief \
+curl http://localhost:21082/scheduled-runs/playbooks
+curl http://localhost:21082/scheduled-runs/playbooks/premarket-brief
+curl -X POST http://localhost:21082/scheduled-runs/playbooks/premarket-brief \
   -H "Content-Type: application/json" \
   -d '{"variables":{"home_market":"US equities","watchlist":"AAPL, MSFT, NVDA"}}'
 ```

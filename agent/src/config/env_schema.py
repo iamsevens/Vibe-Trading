@@ -289,7 +289,7 @@ class APIConfig(_EnvBase):
         alias="VIBE_TRADING_ALLOWED_RUN_ROOTS", default="",
     )
     vibe_trading_api_url: str = Field(
-        alias="VIBE_TRADING_API_URL", default="http://127.0.0.1:8000",
+        alias="VIBE_TRADING_API_URL", default="http://127.0.0.1:21082",
     )
     futu_trade_pwd_md5: str = Field(alias="FUTU_TRADE_PWD_MD5", default="")
 

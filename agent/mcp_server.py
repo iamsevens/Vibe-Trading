@@ -2733,7 +2733,7 @@ def main():
         help="Network bind host for --transport sse / http (default: 127.0.0.1)",
     )
     parser.add_argument(
-        "--port", type=int, default=8900, help="SSE/HTTP port (default: 8900)"
+        "--port", type=int, default=22137, help="SSE/HTTP port (default: 22137)"
     )
     parser.add_argument(
         "--enable-shell-tools",

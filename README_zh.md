@@ -690,7 +690,7 @@ vibe-trading run -p "Backtest a BTC-USDT 20/50 moving-average strategy for 2024 
 ```bash
 vibe-trading init              # interactive .env setup
 vibe-trading                   # launch CLI
-vibe-trading serve --port 8899 # launch web UI
+vibe-trading serve --port 21082 # launch web UI
 vibe-trading-mcp               # start MCP server (stdio)
 ```
 
@@ -724,9 +724,9 @@ cp agent/.env.example agent/.env
 docker compose up --build
 ```
 
-打开 `http://localhost:8899`。后端 + 前端在同一个容器中运行。
+打开 `http://localhost:21082`。后端 + 前端在同一个容器中运行。
 
-Docker 默认将后端发布在 `127.0.0.1:8899`，并以非 root 容器用户运行应用。如果你有意将 API 暴露到本机之外，请设置强 `API_AUTH_KEY`，并让客户端发送 `Authorization: Bearer <key>`。
+Docker 默认将后端发布在 `127.0.0.1:21082`，并以非 root 容器用户运行应用。如果你有意将 API 暴露到本机之外，请设置强 `API_AUTH_KEY`，并让客户端发送 `Authorization: Bearer <key>`。
 
 ### Path B: Local install
 
@@ -753,23 +753,23 @@ vibe-trading                       # Launch interactive TUI
 
 ```bash
 # Terminal 1: API server
-vibe-trading serve --port 8899
+vibe-trading serve --port 21082
 
 # Terminal 2: Frontend dev server
 cd frontend && npm install && npm run dev  # 需要 Node >= 22.22
 ```
 
-打开 `http://localhost:5899`。前端会将 API 调用代理到 `localhost:8899`。
+打开 `http://localhost:5899`。前端会将 API 调用代理到 `localhost:21082`。
 
 **生产模式（单 server）：**
 
 ```bash
 cd frontend && npm run build && cd ..
-vibe-trading serve --port 8899     # FastAPI serves dist/ as static files
+vibe-trading serve --port 21082     # FastAPI serves dist/ as static files
 ```
 
 > [!NOTE]
-> `vibe-trading serve` 绑定 `0.0.0.0`，但默认只信任 loopback：在**同一台机器**上打开 UI（`http://localhost:8899`）零配置即可用。若你从**另一台机器、虚拟机宿主机或局域网内的手机**访问，敏感接口会返回 `403`，聊天会提示 “Remote API access requires an API key”——请在 `agent/.env` 里设置一个强 `API_AUTH_KEY`，重启，并在 **Settings** 中输入同一个 key。（Docker Desktop 宿主网关场景：设 `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` 并保持默认的 `127.0.0.1` 端口绑定。）
+> `vibe-trading serve` 绑定 `0.0.0.0`，但默认只信任 loopback：在**同一台机器**上打开 UI（`http://localhost:21082`）零配置即可用。若你从**另一台机器、虚拟机宿主机或局域网内的手机**访问，敏感接口会返回 `403`，聊天会提示 “Remote API access requires an API key”——请在 `agent/.env` 里设置一个强 `API_AUTH_KEY`，重启，并在 **Settings** 中输入同一个 key。（Docker Desktop 宿主网关场景：设 `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` 并保持默认的 `127.0.0.1` 端口绑定。）
 
 </details>
 
@@ -1024,7 +1024,7 @@ vibe-trading run -p "Summarize the key risks and beats/misses from this earnings
 ## 🌐 API Server
 
 ```bash
-vibe-trading serve --port 8899
+vibe-trading serve --port 21082
 ```
 
 | Method | Endpoint | 说明 |
@@ -1062,7 +1062,7 @@ vibe-trading serve --port 8899
 | `GET` | `/correlation/regime` | 相关性边密度 regime 时间线 |
 | `GET` | `/agents.json` · `POST` `/v1/query` | OpenBB Workspace 桥接——仅在装了可选 `openbb` extra 时注册，`/v1/query` 强制鉴权 |
 
-交互式文档：`http://localhost:8899/docs`
+交互式文档：`http://localhost:21082/docs`
 
 ### Security defaults
 
@@ -1083,25 +1083,25 @@ Settings 读取无副作用：`GET /settings/llm` 和 `GET /settings/data-source
 让研究 prompt 或回测按固定周期重复运行——既可以在 Web UI 的**定时任务**页面操作，也可以走 REST。后台执行器**默认关闭**——启动服务时设置 `VIBE_TRADING_ENABLE_SCHEDULER=1` 才会开启：
 
 ```bash
-VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 8899
+VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 21082
 ```
 
 然后通过 REST 创建任务。`schedule` 可以是纯整数（间隔**毫秒**）或 5 段 cron 表达式（`分 时 日 月 周`，每段支持 `*`、`*/n`、数字、逗号列表和 `1-5` 这样的范围）。cron 按任务可选的 `timezone`（IANA 时区名）的挂钟求值，夏令时切换后节奏保持不变——春季不存在的时间会被跳过，秋季重复的时间只在第一次出现时运行一次。不带 `timezone` 的任务保持原有 UTC 语义：
 
 ```bash
 # 每 6 小时（cron）
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Scan CSI300 for momentum breakouts and backtest the top 5","schedule":"0 */6 * * *"}'
 
 # 工作日 23:30（奥克兰挂钟时间，夏令时不漂移）
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Pre-open scan of NZX names","schedule":"30 23 * * 1-5","timezone":"Pacific/Auckland"}'
 
 # 列出 / 取消
-curl http://localhost:8899/scheduled-runs
-curl -X DELETE http://localhost:8899/scheduled-runs/<job_id>
+curl http://localhost:21082/scheduled-runs
+curl -X DELETE http://localhost:21082/scheduled-runs/<job_id>
 ```
 
 每次触发都会在一个全新的 agent session 中运行该 `prompt`（可选回测参数放在 `config` 里），任务持久化到 `~/.vibe-trading/`，重启后依然保留。不设这个开关时，`/scheduled-runs` 端点仍会记录任务，但不会真正触发。配置了 `API_AUTH_KEY` 时，每次请求需加 `-H "Authorization: Bearer <key>"`。
@@ -1115,9 +1115,9 @@ vibe-trading playbook create premarket-brief \
   --var home_market="US equities" --var watchlist="AAPL, MSFT, NVDA" \
   --timezone America/New_York
 
-curl http://localhost:8899/scheduled-runs/playbooks
-curl http://localhost:8899/scheduled-runs/playbooks/premarket-brief
-curl -X POST http://localhost:8899/scheduled-runs/playbooks/premarket-brief \
+curl http://localhost:21082/scheduled-runs/playbooks
+curl http://localhost:21082/scheduled-runs/playbooks/premarket-brief
+curl -X POST http://localhost:21082/scheduled-runs/playbooks/premarket-brief \
   -H "Content-Type: application/json" \
   -d '{"variables":{"home_market":"US equities","watchlist":"AAPL, MSFT, NVDA"}}'
 ```

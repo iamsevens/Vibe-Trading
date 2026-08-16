@@ -338,9 +338,9 @@ def serve_main(argv: list[str] | None = None) -> int:
                 return await super().get_response("index.html", scope)
 
     parser = argparse.ArgumentParser(description="Vibe-Trading Server")
-    parser.add_argument("--port", type=int, default=8000, help="Listen port (default 8000)")
+    parser.add_argument("--port", type=int, default=21082, help="Listen port (default 21082)")
     parser.add_argument("--host", default="127.0.0.1", help="Bind address")
-    parser.add_argument("--dev", action="store_true", help="Dev mode: spawn Vite on :5173")
+    parser.add_argument("--dev", action="store_true", help="Dev mode: spawn Vite on :5899")
     try:
         args = parser.parse_args(argv)
     except SystemExit as exc:
@@ -358,7 +358,7 @@ def serve_main(argv: list[str] | None = None) -> int:
 
     vite_proc = None
     if args.dev and frontend_root.exists():
-        print("[dev] Starting Vite dev server on :5173 ...")
+        print("[dev] Starting Vite dev server on :5899 ...")
         vite_proc = subprocess.Popen(
             ["npx", "vite", "--host", "0.0.0.0"],
             cwd=str(frontend_root),
@@ -366,7 +366,7 @@ def serve_main(argv: list[str] | None = None) -> int:
             stderr=subprocess.DEVNULL,
         )
         print(f"[dev] Vite PID={vite_proc.pid}")
-        print("[dev] Frontend: http://localhost:5173")
+        print("[dev] Frontend: http://localhost:5899")
         print(f"[dev] API: http://localhost:{args.port}")
     elif frontend_dist.exists():
         if not any(getattr(route, "path", None) == "/" for route in app.routes):

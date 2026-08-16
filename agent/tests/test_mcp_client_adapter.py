@@ -733,12 +733,12 @@ def test_build_client_uses_sse_transport(monkeypatch) -> None:
 
     adapter = MCPServerAdapter(
         "demo",
-        _make_config(type="sse", command="", args=[], url="http://localhost:8900/sse", headers={"X-Test": "1"}),
+        _make_config(type="sse", command="", args=[], url="http://localhost:22137/sse", headers={"X-Test": "1"}),
     )
     adapter._build_client()
 
     assert captured["transport"] == "sse"
-    assert captured["transport_kwargs"]["url"] == "http://localhost:8900/sse"
+    assert captured["transport_kwargs"]["url"] == "http://localhost:22137/sse"
     assert captured["transport_kwargs"]["headers"] == {"X-Test": "1"}
 
 
@@ -763,16 +763,16 @@ def test_build_client_uses_streamable_http_transport(monkeypatch) -> None:
 
     adapter = MCPServerAdapter(
         "demo",
-        _make_config(type="streamableHttp", command="", args=[], url="http://localhost:8900/mcp"),
+        _make_config(type="streamableHttp", command="", args=[], url="http://localhost:22137/mcp"),
     )
     adapter._build_client()
 
     assert captured["transport"] == "streamableHttp"
-    assert captured["transport_kwargs"]["url"] == "http://localhost:8900/mcp"
+    assert captured["transport_kwargs"]["url"] == "http://localhost:22137/mcp"
 
 
 def test_build_client_rejects_url_only_config_without_explicit_type() -> None:
-    config = _make_config(type="sse", command="", args=[], url="http://localhost:8900/sse")
+    config = _make_config(type="sse", command="", args=[], url="http://localhost:22137/sse")
     config.type = None
 
     adapter = MCPServerAdapter("demo", config)

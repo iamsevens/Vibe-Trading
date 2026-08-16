@@ -13,7 +13,7 @@ Each scheduled fire creates a fresh agent session that runs the configured promp
 The background executor is **off by default**. Start the server with the environment flag:
 
 ```bash
-VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 8899
+VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 21082
 ```
 
 Without this flag, the `/scheduled-runs` endpoints still record jobs but nothing fires.
@@ -21,7 +21,7 @@ Without this flag, the `/scheduled-runs` endpoints still record jobs but nothing
 ### Create a weekly decay scan job
 
 ```bash
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "Run a decay scan on all active factors in the CSI300 universe. For any factors showing decay signals, generate a summary report.",
@@ -38,7 +38,7 @@ For operators tracking factors across multiple universes, create separate jobs p
 
 ```bash
 # CSI300 weekly scan
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "Run a decay scan on all active factors in the CSI300 universe. Generate a decay report with status transitions.",
@@ -47,7 +47,7 @@ curl -X POST http://localhost:8899/scheduled-runs \
   }'
 
 # S&P 500 weekly scan (offset by one day)
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "Run a decay scan on all active factors in the SP500 universe. Generate a decay report with status transitions.",
@@ -61,7 +61,7 @@ curl -X POST http://localhost:8899/scheduled-runs \
 When `API_AUTH_KEY` is configured, include the bearer token:
 
 ```bash
-curl -X POST http://localhost:8899/scheduled-runs \
+curl -X POST http://localhost:21082/scheduled-runs \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <your-api-key>" \
   -d '{ ... }'
@@ -112,7 +112,7 @@ When the executor fires a scheduled decay scan job, the agent session performs t
 ### List scheduled jobs
 
 ```bash
-curl http://localhost:8899/scheduled-runs
+curl http://localhost:21082/scheduled-runs
 ```
 
 Returns all configured jobs with their current status, `last_run_at`, and `next_run_at` timestamps.
@@ -130,7 +130,7 @@ This returns the full decay scan output including per-factor metrics, applied tr
 ### Cancel a scheduled job
 
 ```bash
-curl -X DELETE http://localhost:8899/scheduled-runs/<job_id>
+curl -X DELETE http://localhost:21082/scheduled-runs/<job_id>
 ```
 
 Cancelled jobs are marked terminal and never re-dispatched.

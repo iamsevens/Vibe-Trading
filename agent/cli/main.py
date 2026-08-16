@@ -1036,7 +1036,7 @@ def _commit_mandate(proposal: Dict[str, Any], selected_ordinal: int) -> Dict[str
     here because the user's keypress *is* the affirmative consent.
 
     The endpoint base URL is read from ``VIBE_TRADING_API_URL`` (falling back to
-    ``http://127.0.0.1:8000``); a per-request override is not accepted from the
+    ``http://127.0.0.1:21082``); a per-request override is not accepted from the
     proposal payload so the model cannot redirect the commit.
 
     Args:
@@ -1415,7 +1415,7 @@ def _build_typer_app():  # type: ignore[no-untyped-def]
     @app.command("serve", help="Start the FastAPI server.")
     def _serve(
         host: str = typer.Option("127.0.0.1", "--host"),
-        port: int = typer.Option(8000, "--port"),
+        port: int = typer.Option(21082, "--port"),
         dev: bool = typer.Option(False, "--dev", help="Also boot the Vite dev server."),
     ) -> None:
         forwarded = ["serve", "--host", host, "--port", str(port)]
@@ -1447,7 +1447,7 @@ def _build_typer_app():  # type: ignore[no-untyped-def]
 
     @app.command("dev", help="Start backend + Vite dev server in one process.")
     def _dev(
-        port: int = typer.Option(8899, "--port", help="Backend port."),
+        port: int = typer.Option(21082, "--port", help="Backend port."),
         frontend_port: int = typer.Option(
             5899,
             "--frontend-port",

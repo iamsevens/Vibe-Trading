@@ -306,7 +306,7 @@ def test_every_skill_count_in_the_prose_is_current(name: str) -> None:
     Only prose is in scope. Dated news entries are frozen history, credit
     lines carry issue numbers next to the word "skill", and the MCP tool list
     contains ``list_skills`` beside its own count — none of those is a claim
-    about how many skills ship. ``8899`` is the server port.
+    about how many skills ship. ``21082`` is the server port.
     """
     skill_words = ("skill", "Skill", "스킬", "مهارة", "المهارات")
     expected = str(_bundled_skill_count())
@@ -316,7 +316,7 @@ def test_every_skill_count_in_the_prose_is_current(name: str) -> None:
         for line in _read(name).splitlines()
         if any(word in line for word in skill_words)
         and re.search(r"\d\d", line)
-        and "8899" not in line
+        and "21082" not in line
         and not line.startswith("- @")
         and len(re.findall(r"`[a-z_]+`", line)) < 5
         and not NEWS_BULLET.match(line)
