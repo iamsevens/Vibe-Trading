@@ -1,5 +1,7 @@
 # vibe-Trading 数据源接入方案：添加 `ticker_pg` Loader
 
+> **状态：已完成** — 2026-08-16 实施并验证通过，代码已推送至 `origin/main`（commit `2a173a3`、`c17a68e`）。
+
 ---
 
 ## 一、现状
