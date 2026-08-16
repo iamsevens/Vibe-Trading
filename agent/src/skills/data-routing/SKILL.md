@@ -30,6 +30,7 @@ per-source skill.
 | futu | A/HK/US via OpenD gateway | Yes (OpenD running) | Local gateway | data-routing (runner-internal) |
 | mt5 | Forex & metals (your broker's MT5 feed) | Yes (running, logged-in MT5 terminal; optional `~/.vibe-trading/mt5.json`) | Local terminal (Windows) | data-routing (runner-internal) |
 | local | User CSV/parquet on disk | No | Offline | data-routing (runner-internal) |
+| ticker_pg | A-shares (daily, qfq) | Yes (`TICKER_PG_READONLY_DSN`) | LAN (192.168.199.181) | data-routing (runner-internal) |
 | eastmoney | A-shares, HK, US equities | No (IP-throttled) | Unrestricted | data-routing |
 | sina | US equities (daily OHLCV) | No (IP-throttled) | Unrestricted | data-routing |
 | stooq | US equities (daily OHLCV) | No | Unrestricted | data-routing |
@@ -92,8 +93,9 @@ same-market sources automatically. Only set a concrete source when the user asks
 
 ### Source priority (for OHLCV by market)
 
-- **A-shares**: tencent / mootdx (never banned) > tushare (`TUSHARE_TOKEN`) >
-  baostock / akshare > eastmoney (throttled).
+- **A-shares**: ticker_pg (LAN PostgreSQL, `TICKER_PG_READONLY_DSN`) > tencent /
+  mootdx (never banned) > tushare (`TUSHARE_TOKEN`) > baostock / akshare >
+  eastmoney (throttled).
 - **US stocks**: stooq / yahoo > tiingo / finnhub / fmp / alphavantage (key-gated) >
   sina / eastmoney (throttled) > yfinance.
 - **HK stocks**: tencent (never banned, daily) > eastmoney / yahoo > futu (local
